@@ -22,21 +22,21 @@ const upload = multer({ storage });
 
 const createRouter = (db) => {
     router.get("/", async (req, res) => {
-        const fields = "id, title, image, publication_date";
+        let news_id = 0;
+
+        if (req.query.news_id !== undefined) {
+            const value = parseInt(req.query.news_id);
+            if (!isNaN(value)) news_id = value;
+        }
+
+        const fields = "*";
+
+        let condition = "1 = 1";
+        if (news_id > 0) condition = "news_id = " + news_id;
 
         try {
-            const items = await db.getNews("news", fields);
+            const items = await db.getComments("comments", fields, condition);
             res.send(items);
-        }
-        catch (err) {
-            res.send(err);
-        }
-    });
-
-    router.get("/:id", async (req, res) => {
-        try {
-            const items = await db.getItem("news", req.params.id);
-            res.send(items[0]);
         }
         catch (err) {
             res.send(err);
@@ -48,21 +48,21 @@ const createRouter = (db) => {
 
         let err = false;
 
-        if (typeof data["title"] === "undefined") err = true;
-        else if (data["title"] === "") err = true;
+        if (typeof data["news_id"] === "undefined") err = true;
+        else if (data["news_id"] === "") err = true;
 
-        if (typeof data["content"] === "undefined") err = true;
-        else if (data["content"] === "") err = true;
+        if (typeof data["comment"] === "undefined") err = true;
+        else if (data["comment"] === "") err = true;
 
-        if (err) res.status(400).send({ error: "'title' and 'content' must be present in the request" })
+        if (err) res.status(400).send({ error: "'news_id' and 'comment' must be present in the request" })
         else {
-            if (req.file) {
-                data.image = req.file.filename;
-            }
-
             try {
-                const newItem = await db.addItem("news", data);
-                res.send(newItem);
+                const items = await db.getItem("news", data.news_id);
+                if (items.length > 0) {
+                    const newItem = await db.addItem("comments", data);
+                    res.send(newItem);
+                }
+                else res.send(`You cannot add new comment to a non-existent news (news_id=${data.news_id})`);
             }
             catch (err) {
                 res.send(err);
@@ -72,9 +72,7 @@ const createRouter = (db) => {
 
     router.delete("/:id", async (req, res) => {
         try {
-            await db.removeComments(req.params.id, "");
-
-            const result = await db.removeNews(req.params.id);
+            const result = await db.removeComments("", req.params.id);
             res.send(result);
         }
         catch (err) {

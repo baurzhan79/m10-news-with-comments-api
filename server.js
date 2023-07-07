@@ -1,5 +1,6 @@
 const express = require("express");
 const news = require("./app/news");
+const comments = require("./app/comments");
 
 const mysql = require("mysql");
 const config = require("./config");
@@ -26,4 +27,5 @@ connection.connect(err => {
     console.log("mysql connected");
 
     app.use("/news", news(db(connection)));
+    app.use("/comments", comments(db(connection)));
 });

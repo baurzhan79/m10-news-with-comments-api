@@ -1,7 +1,20 @@
 module.exports = (connection) => ({
-    getItems(entity, fields) {
+    getNews(entity, fields) {
         return new Promise((res, rej) => {
-            connection.query(`select ${fields} from ??`, [entity], (err, result) => {
+            connection.query(`select ${fields} from ?? `, [entity], (err, result) => {
+                if (err) {
+                    rej(err)
+                }
+                res(result);
+            })
+        })
+    },
+
+    getComments(entity, fields, condition) {
+        return new Promise((res, rej) => {
+            const strQuery = `select ${fields} from ${entity} where ${condition}`;
+
+            connection.query(strQuery, [], (err, result) => {
                 if (err) {
                     rej(err)
                 }
@@ -33,9 +46,30 @@ module.exports = (connection) => ({
         })
     },
 
-    removeItem(entity, id) {
+    removeComments(news_id, comment_id) {
         return new Promise((res, rej) => {
-            connection.query("delete from ?? where id = ?", [entity, id], (err, result) => {
+            if (news_id !== "") {
+                connection.query("delete from comments where news_id = ?", [news_id], (err, result) => {
+                    if (err) {
+                        rej(err)
+                    }
+                    res("The request was executed without errors");
+                })
+            }
+            else if (comment_id !== "") {
+                connection.query("delete from comments where id = ?", [comment_id], (err, result) => {
+                    if (err) {
+                        rej(err)
+                    }
+                    res("The request was executed without errors");
+                })
+            }
+        })
+    },
+
+    removeNews(id) {
+        return new Promise((res, rej) => {
+            connection.query("delete from news where id = ?", [id], (err, result) => {
                 if (err) {
                     rej(err)
                 }
