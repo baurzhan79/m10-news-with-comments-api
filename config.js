@@ -11,6 +11,6 @@ module.exports = {
         host: "localhost",
         user: "user",
         password: "user",
-        database: "inventory_of_fixed_assets"
+        database: "news_with_comments"
     }
 };
