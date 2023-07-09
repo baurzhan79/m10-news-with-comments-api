@@ -36,7 +36,8 @@ const createRouter = (db) => {
     router.get("/:id", async (req, res) => {
         try {
             const items = await db.getItem("news", req.params.id);
-            res.send(items[0]);
+            if (items.length > 0) res.send(items[0]);
+            else res.status(400).send({ error: `There is no post with id ${req.params.id} in the database` })
         }
         catch (err) {
             res.send(err);
